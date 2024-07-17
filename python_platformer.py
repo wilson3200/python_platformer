@@ -33,7 +33,6 @@ class PythonPlatformer:
         self.obstacles.append(Obstacle(self, 5000, self.settings.screen_height - 16, 600, 16))
         self.obstacles.append(Obstacle(self, 8000, self.settings.screen_height - 16, 2000, 16))
 
-
         # Create Platforms
         self.obstacles.append(Obstacle(self, 2300, self.settings.screen_height - 216, 460, 16))
         self.obstacles.append(Obstacle(self, 4300, self.settings.screen_height - 216, 400, 16))
@@ -41,19 +40,21 @@ class PythonPlatformer:
         self.obstacles.append(Obstacle(self, 6400, self.settings.screen_height - 426, 400, 16))
         self.obstacles.append(Obstacle(self, 7100, self.settings.screen_height - 628, 400, 16))
 
+        # Create Wall (test)
+        # self.obstacles.append(Obstacle(self, 1800, self.settings.screen_height-200, 30, 500))
+
         # Create left wall (using index 1 from forest_tileset.png for the entire height)
         self.obstacles.append(Obstacle(self, 0, 0, 16, self.settings.screen_height, tile_index=1))
 
         # Create right wall (using index 1 from forest_tileset.png for the entire height)
         self.obstacles.append(Obstacle(self, 10000, 0, 16, self.settings.screen_height, tile_index=1))
 
-
     def _create_enemies(self):
         """Create enemies for the level."""
-        self.enemies.append(Enemy(self, 1200, self.settings.screen_height - 25, 25, 250))
-        self.enemies.append(Enemy(self, 2000, self.settings.screen_height - 30, 50, 50))
-        self.enemies.append(Enemy(self, 2200, self.settings.screen_height - 35, 50, 50))
-        self.enemies.append(Enemy(self, 2800, self.settings.screen_height - 40, 50, 50))
+        self.enemies.append(Enemy(self, 1200, self.settings.screen_height - 25))
+        self.enemies.append(Enemy(self, 2000, self.settings.screen_height - 30))
+        self.enemies.append(Enemy(self, 2200, self.settings.screen_height - 35))
+        self.enemies.append(Enemy(self, 2800, self.settings.screen_height - 40))
 
     def run_game(self):
         """Start the main loop for the game."""

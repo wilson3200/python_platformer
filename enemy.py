@@ -4,39 +4,32 @@ from pygame.sprite import Sprite
 class Enemy(Sprite):
     """A class to represent an enemy in the game."""
 
-    def __init__(self, pp_game, x, y, width, height):
+    def __init__(self, pp_game, x, y):
         """Initialize the enemy and its starting position."""
         super().__init__()
         self.screen = pp_game.screen
         self.settings = pp_game.settings
 
-        # Load spritesheets for different animations
-        self.moving_spritesheet = pygame.image.load('slime_moving.png').convert_alpha()
-        self.idle_spritesheet = pygame.image.load('slime_idle.png').convert_alpha()
+        # Load spritesheet for animations
+        self.spritesheet = pygame.image.load('enemies.png').convert_alpha()
 
-        # Define dimensions of frames in the spritesheets
-        self.frame_width = 64  # Adjust according to your spritesheets
-        self.frame_height = 64  # Adjust according to your spritesheets
+        # Define dimensions of frames in the spritesheet
+        self.frame_width = 20  # Width of each frame
+        self.frame_height = 20  # Height of each frame
 
-        # Initialize animation variables for moving
-        self.current_moving_frame = 0
-        self.moving_frames = []  # List to store moving frames
-        self.moving_frame_delay = 125  # Number of game loops before updating moving frame
-        self.moving_loop_count = 0  # Counter for moving animation loops
-
-        # Initialize animation variables for idle
-        self.current_idle_frame = 0
-        self.idle_frames = []  # List to store idle frames
-        self.idle_frame_delay = 225  # Number of game loops before updating idle frame
-        self.idle_loop_count = 0  # Counter for idle animation loops
+        # Initialize animation variables
+        self.current_frame = 0
+        self.frames = []  # List to store frames
+        self.frame_delay = 125  # Number of game loops before updating frame
+        self.loop_count = 0  # Counter for animation loops
 
         self._extract_frames()
 
-        # Set initial enemy image and rect to idle animation
-        self.image = self.idle_frames[self.current_idle_frame]
+        # Set initial enemy image and rect
+        self.image = self.frames[self.current_frame]
         self.rect = self.image.get_rect()
 
-        # Set initial position with y offset
+        # Set initial position
         self.rect.x = x
         self.rect.bottom = y
 
@@ -56,51 +49,29 @@ class Enemy(Sprite):
         self.last_direction = "right"
 
     def _extract_frames(self):
-        """Extract frames from the spritesheets."""
-        self._extract_moving_frames()
-        self._extract_idle_frames()
+        """Extract frames from the spritesheet."""
+        num_rows = 12  # Total number of rows in the spritesheet
+        num_cols = 4  # Total number of columns in the spritesheet
 
-    def _extract_moving_frames(self):
-        """Extract moving frames from the moving spritesheet."""
-        num_frames = self.moving_spritesheet.get_width() // self.frame_width
-        for i in range(num_frames):
-            frame_rect = pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height)
-            frame_image = self.moving_spritesheet.subsurface(frame_rect)
-            self.moving_frames.append(frame_image)
+        # Select the 9th row for this enemy's animation
+        row = 8  # Zero-based index (9th row)
 
-    def _extract_idle_frames(self):
-        """Extract idle frames from the idle spritesheet."""
-        num_frames = self.idle_spritesheet.get_width() // self.frame_width
-        for i in range(num_frames):
-            frame_rect = pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height)
-            frame_image = self.idle_spritesheet.subsurface(frame_rect)
-            self.idle_frames.append(frame_image)
+        for col in range(num_cols):
+            frame_rect = pygame.Rect(col * self.frame_width, row * self.frame_height, self.frame_width, self.frame_height)
+            frame_image = self.spritesheet.subsurface(frame_rect)
+            self.frames.append(frame_image)
 
     def update(self):
         """Update the enemy's position and animation."""
-        if self.moving_right or not self.moving_right:
-            # Update moving animation
-            self.moving_loop_count += 1
-            if self.moving_loop_count >= self.moving_frame_delay:
-                self.current_moving_frame = (self.current_moving_frame + 1) % len(self.moving_frames)
-                self.image = self.moving_frames[self.current_moving_frame]
-                self.moving_loop_count = 0
+        self.loop_count += 1
+        if self.loop_count >= self.frame_delay:
+            self.current_frame = (self.current_frame + 1) % len(self.frames)
+            self.image = self.frames[self.current_frame]
+            self.loop_count = 0
 
-                # Flip sprite if moving left
-                if not self.moving_right:
-                    self.image = pygame.transform.flip(self.image, True, False)
-
-        else:
-            # Update idle animation
-            self.idle_loop_count += 1
-            if self.idle_loop_count >= self.idle_frame_delay:
-                self.current_idle_frame = (self.current_idle_frame + 1) % len(self.idle_frames)
-                self.image = self.idle_frames[self.current_idle_frame]
-                self.idle_loop_count = 0
-
-                # Flip sprite based on last movement direction
-                if self.last_direction == "left":
-                    self.image = pygame.transform.flip(self.image, True, False)
+            # Flip sprite if moving left
+            if not self.moving_right:
+                self.image = pygame.transform.flip(self.image, True, False)
 
         # Update enemy's position based on movement flags
         if self.moving_right:
@@ -114,11 +85,6 @@ class Enemy(Sprite):
         self.vertical_speed += self.gravity
         self.y += self.vertical_speed
 
-        # Check if enemy is on the ground
-        if self.y >= self.settings.screen_height:
-            self.y = self.settings.screen_height
-            self.vertical_speed = 0
-
         # Update the rect object from self.x and self.y
         self.rect.x = self.x
         self.rect.bottom = self.y  # Ensure bottom aligns with y to avoid floating
@@ -129,4 +95,17 @@ class Enemy(Sprite):
 
     def draw(self, adjusted_rect):
         """Draw the enemy to the screen."""
-        self.screen.blit(self.image, adjusted_rect)
+        # Scale the image to four times its size
+        scaled_image = pygame.transform.scale(self.image, (self.rect.width * 4, self.rect.height * 4))
+
+        # Adjust the position to keep the center of the sprite at the same location and raise it by 30 pixels
+        scaled_rect = scaled_image.get_rect(center=adjusted_rect.center)
+        scaled_rect.y -= 30
+
+        # Halve the size of the collision rect
+        collision_rect = self.rect.copy()
+        collision_rect.width //= 2
+        collision_rect.height //= 1
+        collision_rect.center = adjusted_rect.center
+
+        self.screen.blit(scaled_image, scaled_rect)
