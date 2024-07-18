@@ -109,3 +109,17 @@ class Enemy(Sprite):
         collision_rect.center = adjusted_rect.center
 
         self.screen.blit(scaled_image, scaled_rect)
+
+    def check_edges(self, obstacles):
+        """Check if the enemy is at the edge of an obstacle."""
+        buffer = 5  # Buffer to avoid switching too early
+        on_obstacle = False
+        for obstacle in obstacles:
+            if self.rect.bottom == obstacle.rect.top and obstacle.rect.left < self.rect.right and self.rect.left < obstacle.rect.right:
+                on_obstacle = True
+                if self.moving_right and self.rect.right >= obstacle.rect.right - buffer:
+                    self.switch_direction()
+                elif not self.moving_right and self.rect.left <= obstacle.rect.left + buffer:
+                    self.switch_direction()
+        if not on_obstacle:
+            self.vertical_speed += self.gravity

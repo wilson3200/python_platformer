@@ -5,6 +5,7 @@ from game_stats import GameStats
 from player import Player
 from obstacle import Obstacle
 from enemy import Enemy
+from level_complete import LevelComplete
 
 class PythonPlatformer:
     """Class to manage game, the assets, and behaviors."""
@@ -24,6 +25,10 @@ class PythonPlatformer:
         self._create_obstacles()
         self._create_enemies()
         self.font = pygame.font.SysFont(None, 48)
+        self.level_complete = LevelComplete(self, 9_990, self.settings.screen_height-48)
+
+        # Load background music
+        pygame.mixer.music.load('box_jump.ogg')
 
     def _create_obstacles(self):
         """Create obstacles and ground for the level."""
@@ -51,13 +56,25 @@ class PythonPlatformer:
 
     def _create_enemies(self):
         """Create enemies for the level."""
-        self.enemies.append(Enemy(self, 1200, self.settings.screen_height - 25))
-        self.enemies.append(Enemy(self, 2000, self.settings.screen_height - 30))
-        self.enemies.append(Enemy(self, 2200, self.settings.screen_height - 35))
-        self.enemies.append(Enemy(self, 2800, self.settings.screen_height - 40))
+        # Enemies on the ground sections
+        self.enemies.append(Enemy(self, 1000, self.settings.screen_height - 16 - 25))  # Ground section 1
+        self.enemies.append(Enemy(self, 3200 + 400, self.settings.screen_height - 16 - 25))  # Ground section 2
+        self.enemies.append(Enemy(self, 5000 + 300, self.settings.screen_height - 16 - 25))  # Ground section 3
+        self.enemies.append(Enemy(self, 8000 + 1000, self.settings.screen_height - 16 - 25))  # Ground section 4
+
+        # Enemies on the platform sections
+        self.enemies.append(Enemy(self, 2300 + 200, self.settings.screen_height - 216 - 25))  # Platform 1
+        self.enemies.append(Enemy(self, 4300 + 200, self.settings.screen_height - 216 - 25))  # Platform 2
+        self.enemies.append(Enemy(self, 5800 + 150, self.settings.screen_height - 240 - 25))  # Platform 3
+        self.enemies.append(Enemy(self, 6400 + 200, self.settings.screen_height - 426 - 25))  # Platform 4
+        self.enemies.append(Enemy(self, 7100 + 200, self.settings.screen_height - 628 - 25))  # Platform 5
 
     def run_game(self):
         """Start the main loop for the game."""
+
+        # Play background music
+        pygame.mixer.music.play(-1)  # loops indefinitely
+
         while True:
             self._check_events()
             if self.stats.game_active:
@@ -67,7 +84,16 @@ class PythonPlatformer:
                 self._check_collisions()
                 self._update_enemies()
                 self.stats.update_time()
+
             self._update_screen()
+
+            # Check if game is not active
+            if not self.stats.game_active:
+                self._stop_music()  # Stop background music when game is not active
+                # Check if player reached level complete object
+                if pygame.sprite.collide_rect(self.player, self.level_complete):
+                    # Set level to 2
+                    self.stats.level = 2
 
     def _check_collisions(self):
         """Check for collisions between the player and obstacles, and between enemies and obstacles."""
@@ -114,6 +140,12 @@ class PythonPlatformer:
         # Check to see if player fell off the map
         if self.player.rect.y >= self.settings.screen_height + 200:
             self.stats.game_active = False
+
+        # Check collision with level complete object
+        adjusted_level_complete_rect = self.level_complete.rect.copy()
+        adjusted_level_complete_rect.x -= self.camera_x
+        if self.player.rect.colliderect(adjusted_level_complete_rect):
+            self.stats.level = 2
 
     def _check_events(self):
         """Watch for keyboard and mouse events."""
@@ -167,12 +199,19 @@ class PythonPlatformer:
             adjusted_enemy_rect = enemy.rect.copy()
             adjusted_enemy_rect.x -= self.camera_x
             enemy.draw(adjusted_enemy_rect)
+
+        # Adjust the position of the level complete object
+        adjusted_level_complete_rect = self.level_complete.rect.copy()
+        adjusted_level_complete_rect.x -= self.camera_x
+        self.level_complete.draw(self.screen, adjusted_level_complete_rect)  # Draw the level complete object
+
         self._draw_timer()
         pygame.display.flip()
 
     def _update_enemies(self):
         """Update the positions of all enemies in the game."""
         for enemy in self.enemies:
+            enemy.check_edges(self.obstacles)
             enemy.update()
 
     def _draw_timer(self):
@@ -181,6 +220,9 @@ class PythonPlatformer:
         timer_image = self.font.render(timer_text, True, (30, 30, 30))
         self.screen.blit(timer_image, (20, 20))
 
+    def _stop_music(self):
+        """Stop playing background music."""
+        pygame.mixer.music.stop()
 
 if __name__ == '__main__':
     pp = PythonPlatformer()
