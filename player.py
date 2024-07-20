@@ -23,7 +23,7 @@ class Player(Sprite):
         # Initialize animation variables for walking
         self.current_walk_frame = 0
         self.walk_frames = []  # List to store walking frames
-        self.walk_frame_delay = self.settings.running_animation_time # Number of game loops before updating walk frame
+        self.walk_frame_delay = self.settings.running_animation_time  # Number of game loops before updating walk frame
         self.walk_loop_count = 0  # Counter for walk animation loops
 
         # Initialize animation variables for idle
@@ -64,6 +64,9 @@ class Player(Sprite):
 
         # Track last movement direction for idle animation
         self.last_direction = "right"  # Initial direction
+
+        # Load the jump sound effect
+        self.jump_sound = pygame.mixer.Sound('jump1.wav')
 
     def _extract_frames(self):
         """Extract frames from the spritesheets."""
@@ -145,6 +148,8 @@ class Player(Sprite):
         if self.jumping and not self.is_jumping:
             self.vertical_speed = -self.jump_strength
             self.is_jumping = True
+            # Play the jump sound effect
+            self.jump_sound.play()
 
         # Apply gravity if the player is in the air
         if self.is_jumping or self.vertical_speed != 0:
