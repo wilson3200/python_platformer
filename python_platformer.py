@@ -25,7 +25,7 @@ class PythonPlatformer:
         self._create_obstacles()
         self._create_enemies()
         self.font = pygame.font.SysFont(None, 48)
-        self.level_complete = LevelComplete(self, 9_990, self.settings.screen_height-48)
+        self.level_complete = LevelComplete(self, 9_950, self.settings.screen_height-48)
 
         # Load background music
         pygame.mixer.music.load('box_jump.ogg')
@@ -75,6 +75,8 @@ class PythonPlatformer:
         # Play background music
         pygame.mixer.music.play(-1)  # loops indefinitely
 
+        level_complete_collided = False  # Track if collision with level complete object has occurred
+
         while True:
             self._check_events()
             if self.stats.game_active:
@@ -84,6 +86,12 @@ class PythonPlatformer:
                 self._check_collisions()
                 self._update_enemies()
                 self.stats.update_time()
+
+                # Check if player reached level complete object
+                if pygame.sprite.collide_rect(self.player, self.level_complete):
+                    if not level_complete_collided:  # Only open the chest if not already opened
+                        self.level_complete.open()
+                        level_complete_collided = True  # Mark as collided to avoid reopening
 
             self._update_screen()
 
@@ -145,6 +153,7 @@ class PythonPlatformer:
         adjusted_level_complete_rect = self.level_complete.rect.copy()
         adjusted_level_complete_rect.x -= self.camera_x
         if self.player.rect.colliderect(adjusted_level_complete_rect):
+            self.level_complete.open()
             self.stats.level = 2
 
     def _check_events(self):
