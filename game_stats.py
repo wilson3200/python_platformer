@@ -4,17 +4,15 @@ class GameStats:
     """Track statistics for Python Platformer."""
 
     def __init__(self, pp_game):
-        """Initialize statistics."""
-        self.settings = pp_game.settings
+        self.pp_game = pp_game
         self.reset_stats()
         self.game_active = True
-        self.start_time = time.time()
-        self.elapsed_time = 0
+        self.level = 1
+        self.level_complete_time = None  # Track when the level was completed
 
     def reset_stats(self):
-        """Initialize statistics that can change during the game."""
-        self.score = 0
-        self.level = 1
+        self.elapsed_time = 0.0
+        self.start_time = time.time()  # Initialize the start time
 
     def update_time(self):
         """Update the elapsed time."""

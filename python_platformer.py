@@ -3,9 +3,8 @@ import pygame
 from settings import Settings
 from game_stats import GameStats
 from player import Player
-from obstacle import Obstacle
-from enemy import Enemy
-from level_complete import LevelComplete
+from level_one import LevelOne
+from level_two import LevelTwo
 
 class PythonPlatformer:
     """Class to manage game, the assets, and behaviors."""
@@ -17,64 +16,22 @@ class PythonPlatformer:
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height), pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
-        self.stats = GameStats(self)
+        self.stats = GameStats(self)  # Pass self to GameStats
         self.player = Player(self)
         self.camera_x = 0
-        self.obstacles = []
-        self.enemies = []
-        self._create_obstacles()
-        self._create_enemies()
+        self._load_level()  # Load the initial level
         self.font = pygame.font.SysFont(None, 48)
-        self.level_complete = LevelComplete(self, 9_950, self.settings.screen_height-48)
 
-        # Load background music
-        pygame.mixer.music.load('box_jump.ogg')
-
-    def _create_obstacles(self):
-        """Create obstacles and ground for the level."""
-        # Create the ground
-        self.obstacles.append(Obstacle(self, 0, self.settings.screen_height - 16, 2000, 16))
-        self.obstacles.append(Obstacle(self, 3200, self.settings.screen_height - 16, 800, 16))
-        self.obstacles.append(Obstacle(self, 5000, self.settings.screen_height - 16, 600, 16))
-        self.obstacles.append(Obstacle(self, 8000, self.settings.screen_height - 16, 2000, 16))
-
-        # Create Platforms
-        self.obstacles.append(Obstacle(self, 2300, self.settings.screen_height - 216, 460, 16))
-        self.obstacles.append(Obstacle(self, 4300, self.settings.screen_height - 216, 400, 16))
-        self.obstacles.append(Obstacle(self, 5800, self.settings.screen_height - 240, 300, 16))
-        self.obstacles.append(Obstacle(self, 6400, self.settings.screen_height - 426, 400, 16))
-        self.obstacles.append(Obstacle(self, 7100, self.settings.screen_height - 628, 400, 16))
-
-        # Create Wall (test)
-        # self.obstacles.append(Obstacle(self, 1800, self.settings.screen_height-200, 30, 500))
-
-        # Create left wall (using index 1 from forest_tileset.png for the entire height)
-        self.obstacles.append(Obstacle(self, 0, 0, 16, self.settings.screen_height, tile_index=1))
-
-        # Create right wall (using index 1 from forest_tileset.png for the entire height)
-        self.obstacles.append(Obstacle(self, 10000, 0, 16, self.settings.screen_height, tile_index=1))
-
-    def _create_enemies(self):
-        """Create enemies for the level."""
-        # Enemies on the ground sections
-        self.enemies.append(Enemy(self, 1000, self.settings.screen_height - 16 - 25))  # Ground section 1
-        self.enemies.append(Enemy(self, 3200 + 400, self.settings.screen_height - 16 - 25))  # Ground section 2
-        self.enemies.append(Enemy(self, 5000 + 300, self.settings.screen_height - 16 - 25))  # Ground section 3
-        self.enemies.append(Enemy(self, 8000 + 1000, self.settings.screen_height - 16 - 25))  # Ground section 4
-
-        # Enemies on the platform sections
-        self.enemies.append(Enemy(self, 2300 + 200, self.settings.screen_height - 216 - 25))  # Platform 1
-        self.enemies.append(Enemy(self, 4300 + 200, self.settings.screen_height - 216 - 25))  # Platform 2
-        self.enemies.append(Enemy(self, 5800 + 150, self.settings.screen_height - 240 - 25))  # Platform 3
-        self.enemies.append(Enemy(self, 6400 + 200, self.settings.screen_height - 426 - 25))  # Platform 4
-        self.enemies.append(Enemy(self, 7100 + 200, self.settings.screen_height - 628 - 25))  # Platform 5
+    def _load_level(self):
+        """Load the current level based on the stats."""
+        if self.stats.level == 1:
+            self.level = LevelOne(self)
+        elif self.stats.level == 2:
+            self.level = LevelTwo(self)
+        self.level.set_player_position()  # Set the player's initial position for the loaded level
 
     def run_game(self):
         """Start the main loop for the game."""
-
-        # Play background music
-        pygame.mixer.music.play(-1)  # loops indefinitely
-
         level_complete_collided = False  # Track if collision with level complete object has occurred
 
         while True:
@@ -84,29 +41,41 @@ class PythonPlatformer:
                 self.player.draw()
                 self._update_camera()
                 self._check_collisions()
-                self._update_enemies()
+                self.level.update()
                 self.stats.update_time()
 
                 # Check if player reached level complete object
-                if pygame.sprite.collide_rect(self.player, self.level_complete):
+                if pygame.sprite.collide_rect(self.player, self.level.level_complete):
                     if not level_complete_collided:  # Only open the chest if not already opened
-                        self.level_complete.open()
+                        self.level.level_complete.open()
                         level_complete_collided = True  # Mark as collided to avoid reopening
+                        self.stats.level_complete_time = pygame.time.get_ticks()  # Record the time of collision
 
             self._update_screen()
+
+            # Check if level completion delay has passed
+            if self.stats.level_complete_time and (pygame.time.get_ticks() - self.stats.level_complete_time >= 2000):
+                self._start_next_level()
 
             # Check if game is not active
             if not self.stats.game_active:
                 self._stop_music()  # Stop background music when game is not active
                 # Check if player reached level complete object
-                if pygame.sprite.collide_rect(self.player, self.level_complete):
+                if pygame.sprite.collide_rect(self.player, self.level.level_complete):
                     # Set level to 2
                     self.stats.level = 2
+
+    def _start_next_level(self):
+        """Start the next level."""
+        self.stats.level += 1
+        self.stats.level_complete_time = None  # Reset the level complete time
+        self.level = LevelTwo(self)
+        self.level.set_player_position()  # Set the player's position for the new level
 
     def _check_collisions(self):
         """Check for collisions between the player and obstacles, and between enemies and obstacles."""
         player_colliding = False
-        for obstacle in self.obstacles:
+        for obstacle in self.level.obstacles:
             if self.player.rect.colliderect(obstacle.rect):
                 player_colliding = True
                 if self.player.vertical_speed > 0 and self.player.rect.bottom > obstacle.rect.top and self.player.rect.top < obstacle.rect.top:
@@ -130,15 +99,15 @@ class PythonPlatformer:
             self.player.vertical_speed = 1.0
 
         # Check collisions between player and enemies using rect
-        for enemy in self.enemies:
+        for enemy in self.level.enemies:
             if self.player.rect.colliderect(enemy.rect):
                 # If player collides with any enemy, end the game
                 self.stats.game_active = False
                 break
 
         # Check collisions between enemies and obstacles
-        for enemy in self.enemies:
-            for obstacle in self.obstacles:
+        for enemy in self.level.enemies:
+            for obstacle in self.level.obstacles:
                 if enemy.rect.colliderect(obstacle.rect):
                     if enemy.vertical_speed > 0 and enemy.rect.bottom > obstacle.rect.top and enemy.rect.top < obstacle.rect.top:
                         enemy.rect.bottom = obstacle.rect.top
@@ -150,11 +119,14 @@ class PythonPlatformer:
             self.stats.game_active = False
 
         # Check collision with level complete object
-        adjusted_level_complete_rect = self.level_complete.rect.copy()
+        adjusted_level_complete_rect = self.level.level_complete.rect.copy()
         adjusted_level_complete_rect.x -= self.camera_x
+        '''
         if self.player.rect.colliderect(adjusted_level_complete_rect):
-            self.level_complete.open()
-            self.stats.level = 2
+            if not self.level.level_complete.opened:  # Ensure the chest is only opened once
+                self.level.level_complete.open()
+                self.stats.level = 2
+        '''
 
     def _check_events(self):
         """Watch for keyboard and mouse events."""
@@ -200,28 +172,15 @@ class PythonPlatformer:
         adjusted_player_rect = self.player.rect.copy()
         adjusted_player_rect.x -= self.camera_x
         self.screen.blit(self.player.image, adjusted_player_rect)
-        for obstacle in self.obstacles:
-            adjusted_obstacle_rect = obstacle.rect.copy()
-            adjusted_obstacle_rect.x -= self.camera_x
-            obstacle.draw(adjusted_obstacle_rect)
-        for enemy in self.enemies:
-            adjusted_enemy_rect = enemy.rect.copy()
-            adjusted_enemy_rect.x -= self.camera_x
-            enemy.draw(adjusted_enemy_rect)
+        self.level.draw()  # Draw level elements
 
-        # Adjust the position of the level complete object
-        adjusted_level_complete_rect = self.level_complete.rect.copy()
+        # Draw the level complete object
+        adjusted_level_complete_rect = self.level.level_complete.rect.copy()
         adjusted_level_complete_rect.x -= self.camera_x
-        self.level_complete.draw(self.screen, adjusted_level_complete_rect)  # Draw the level complete object
+        self.level.level_complete.draw(self.screen, adjusted_level_complete_rect)
 
         self._draw_timer()
         pygame.display.flip()
-
-    def _update_enemies(self):
-        """Update the positions of all enemies in the game."""
-        for enemy in self.enemies:
-            enemy.check_edges(self.obstacles)
-            enemy.update()
 
     def _draw_timer(self):
         """Draw the timer on the screen."""

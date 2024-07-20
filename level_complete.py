@@ -9,7 +9,7 @@ class LevelComplete(pygame.sprite.Sprite):
         self.sprite_sheet = pygame.image.load('chests.png').convert_alpha()
         self.closed_chest = self._get_image(0, 0)
         self.open_chest = self._get_image(2, 0)
-        self.image.blit(self.closed_chest, (0, 0))
+        self.image.blit(self.closed_chest, (1, 1))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -28,6 +28,10 @@ class LevelComplete(pygame.sprite.Sprite):
 
     def open(self):
         """Open the chest."""
-        self.opened = True
-        self.image.blit(self.open_chest, (0, 0))  # Directly blit the opened chest image
-        print("Chest opened!")  # Debug statement
+        if not self.opened:
+            self.opened = True
+            self.image = pygame.Surface((32, 32), pygame.SRCALPHA)  # Reset the surface
+            self.image.blit(self.open_chest, (0, 0))  # Blit the opened chest image
+            print("Chest opened!")  # Debug statement
+        else:
+            print("Chest already opened.")  # Additional debug statement

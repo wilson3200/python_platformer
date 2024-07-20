@@ -9,8 +9,8 @@ class Settings:
         self.bg_color = (255, 255, 255)  # White background
 
         # Player settings
-        self.player_speed = 25.0 #1.7
-        self.jump_strength = 50.0  # Increased jump strength for better vertical movement (#8.0)
+        self.player_speed = 1.7
+        self.jump_strength = 8.0  # Increased jump strength for better vertical movement
         self.idle_animation_time = 50
         self.running_animation_time = 20
         self.jumping_animation_time = 50

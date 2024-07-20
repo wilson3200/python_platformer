@@ -1,4 +1,3 @@
-# level_two.py
 import pygame
 from obstacle import Obstacle
 from enemy import Enemy
@@ -13,6 +12,10 @@ class LevelTwo:
         self._create_obstacles()
         self._create_enemies()
 
+        # Load background music
+        pygame.mixer.music.load('box_jump.ogg')
+        pygame.mixer.music.play(-1)  # loops indefinitely
+
     def _create_obstacles(self):
         """Create obstacles and ground for level two."""
         # Example: Add obstacles specific to level two
@@ -24,6 +27,12 @@ class LevelTwo:
         # Example: Add enemies specific to level two
         self.enemies.append(Enemy(self.pp_game, 2000, self.pp_game.settings.screen_height - 16 - 25))
         # Add more enemies
+
+    def set_player_position(self):
+        """Set the player's initial position for level two."""
+        self.pp_game.player.rect.topleft = (500, self.pp_game.settings.screen_height - 100)  # Example position, adjust as needed
+        self.pp_game.player.x = float(self.pp_game.player.rect.x)
+        self.pp_game.player.y = float(self.pp_game.player.rect.y)
 
     def update(self):
         """Update level two elements."""
