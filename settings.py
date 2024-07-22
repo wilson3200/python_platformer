@@ -9,21 +9,21 @@ class Settings:
         self.bg_color = (255, 255, 255)  # White background
 
         # Player settings
-        self.player_speed = 1.7
-        self.jump_strength = 8.0  # Increased jump strength for better vertical movement
+        self.player_speed = 1.5
+        self.jump_strength = 7.0  # Increased jump strength for better vertical movement
         self.idle_animation_time = 50
         self.running_animation_time = 20
         self.jumping_animation_time = 50
 
         # Gravity settings
-        self.gravity = .07  # Increased gravity for better vertical movement
+        self.gravity = .05  # Increased gravity for better vertical movement
 
         # Camera settings
         self.camera_speed = 1.5
-        self.camera_margin = 400  # Margin before the camera starts moving
+        self.camera_margin = 600  # Margin before the camera starts moving
 
         # Background settings
         self.bg_color = (255, 255, 255)  # White background
 
         # Enemy settings
-        self.enemy_speed = 0.5  # Speed of enemy NPCs
+        self.enemy_speed = 0.35  # Speed of enemy NPCs

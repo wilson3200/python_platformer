@@ -15,6 +15,9 @@ class LevelComplete(pygame.sprite.Sprite):
         self.rect.y = y
         self.opened = False
 
+        # Load the sound
+        self.open_sound = pygame.mixer.Sound('CoinPickUp3.wav')
+
     def _get_image(self, col, row):
         """Extracts a sprite from the sprite sheet."""
         width, height = 16, 16
@@ -32,6 +35,7 @@ class LevelComplete(pygame.sprite.Sprite):
             self.opened = True
             self.image = pygame.Surface((32, 32), pygame.SRCALPHA)  # Reset the surface
             self.image.blit(self.open_chest, (0, 0))  # Blit the opened chest image
+            self.open_sound.play()  # Play the sound
             print("Chest opened!")  # Debug statement
         else:
             print("Chest already opened.")  # Additional debug statement

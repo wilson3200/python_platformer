@@ -163,3 +163,19 @@ class Player(Sprite):
     def draw(self):
         """Draw the player's sprite and the collision rect."""
         self.screen.blit(self.image, self.rect)
+
+    def reset_position(self):
+        """Reset the player's position and state."""
+        self.rect.midbottom = (self.screen_rect.midbottom[0], self.screen_rect.midbottom[1] - 16)
+        self.x = float(self.rect.x)
+        self.y = float(self.rect.y)
+        self.vertical_speed = 0
+        self.is_jumping = False
+        self.moving_right = False
+        self.moving_left = False
+        self.jumping = False
+        self.last_direction = "right"  # Reset direction to right
+        self.current_walk_frame = 0
+        self.current_idle_frame = 0
+        self.current_jump_frame = 0
+        self.image = self.walk_frames[self.current_walk_frame]  # Reset to initial walking frame

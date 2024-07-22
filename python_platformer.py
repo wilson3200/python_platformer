@@ -21,6 +21,11 @@ class PythonPlatformer:
         self.camera_x = 0
         self._load_level()  # Load the initial level
         self.font = pygame.font.SysFont(None, 48)
+        self.pause_menu_font = pygame.font.SysFont(None, 72)
+
+        # Pause menu related
+        self.pause_menu_active = False
+        # self._play_music()  # Start the music when the game is initialized
 
     def _load_level(self):
         """Load the current level based on the stats."""
@@ -36,7 +41,7 @@ class PythonPlatformer:
 
         while True:
             self._check_events()
-            if self.stats.game_active:
+            if self.stats.game_active and not self.pause_menu_active:
                 self.player.update()
                 self.player.draw()
                 self._update_camera()
@@ -56,14 +61,6 @@ class PythonPlatformer:
             # Check if level completion delay has passed
             if self.stats.level_complete_time and (pygame.time.get_ticks() - self.stats.level_complete_time >= 2000):
                 self._start_next_level()
-
-            # Check if game is not active
-            if not self.stats.game_active:
-                self._stop_music()  # Stop background music when game is not active
-                # Check if player reached level complete object
-                if pygame.sprite.collide_rect(self.player, self.level.level_complete):
-                    # Set level to 2
-                    self.stats.level = 2
 
     def _start_next_level(self):
         """Start the next level."""
@@ -118,16 +115,6 @@ class PythonPlatformer:
         if self.player.rect.y >= self.settings.screen_height + 200:
             self.stats.game_active = False
 
-        # Check collision with level complete object
-        adjusted_level_complete_rect = self.level.level_complete.rect.copy()
-        adjusted_level_complete_rect.x -= self.camera_x
-        '''
-        if self.player.rect.colliderect(adjusted_level_complete_rect):
-            if not self.level.level_complete.opened:  # Ensure the chest is only opened once
-                self.level.level_complete.open()
-                self.stats.level = 2
-        '''
-
     def _check_events(self):
         """Watch for keyboard and mouse events."""
         for event in pygame.event.get():
@@ -137,6 +124,8 @@ class PythonPlatformer:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
+            elif event.type == pygame.MOUSEBUTTONDOWN and self.pause_menu_active:
+                self._check_pause_menu_events(event)
 
     def _check_keydown_events(self, event):
         """Responds to key presses."""
@@ -147,6 +136,8 @@ class PythonPlatformer:
         elif event.key == pygame.K_w:
             if not self.player.is_jumping:
                 self.player.jumping = True
+        elif event.key == pygame.K_ESCAPE:
+            self._toggle_pause()
 
     def _check_keyup_events(self, event):
         """Responds to key releases."""
@@ -156,8 +147,6 @@ class PythonPlatformer:
             self.player.moving_left = False
         elif event.key == pygame.K_w:
             self.player.jumping = False
-        elif event.key == pygame.K_q:
-            sys.exit()
 
     def _update_camera(self):
         """Update the camera position to follow the player horizontally."""
@@ -180,6 +169,10 @@ class PythonPlatformer:
         self.level.level_complete.draw(self.screen, adjusted_level_complete_rect)
 
         self._draw_timer()
+
+        if self.pause_menu_active:
+            self._draw_pause_menu()
+
         pygame.display.flip()
 
     def _draw_timer(self):
@@ -188,9 +181,53 @@ class PythonPlatformer:
         timer_image = self.font.render(timer_text, True, (30, 30, 30))
         self.screen.blit(timer_image, (20, 20))
 
-    def _stop_music(self):
-        """Stop playing background music."""
-        pygame.mixer.music.stop()
+    def _toggle_pause(self):
+        """Toggle the pause state of the game."""
+        self.pause_menu_active = not self.pause_menu_active
+        self.stats.game_active = not self.pause_menu_active
+        if not self.pause_menu_active:
+            pygame.mixer.music.unpause()  # Resume music when game is unpaused
+        else:
+            pygame.mixer.music.pause()  # Pause music when game is paused
+
+    def _draw_pause_menu(self):
+        """Draw the pause menu."""
+        pause_text = self.pause_menu_font.render("Paused", True, (255, 255, 255))
+        resume_button = self._create_button("Resume", (self.settings.screen_width // 2, self.settings.screen_height // 2 - 50))
+        restart_button = self._create_button("Restart", (self.settings.screen_width // 2, self.settings.screen_height // 2))
+        exit_button = self._create_button("Exit", (self.settings.screen_width // 2, self.settings.screen_height // 2 + 50))
+
+        self.screen.blit(pause_text, (self.settings.screen_width // 2 - pause_text.get_width() // 2, self.settings.screen_height // 2 - 100))
+        self.screen.blit(resume_button[0], resume_button[1])
+        self.screen.blit(restart_button[0], restart_button[1])
+        self.screen.blit(exit_button[0], exit_button[1])
+
+        self.resume_button_rect = resume_button[1]
+        self.restart_button_rect = restart_button[1]
+        self.exit_button_rect = exit_button[1]
+
+    def _create_button(self, text, position):
+        """Create a button with text and return the text surface and its rect."""
+        button_text = self.pause_menu_font.render(text, True, (0, 0, 0))  # Changed color to black
+        button_rect = button_text.get_rect(center=position)
+        return button_text, button_rect
+
+    def _check_pause_menu_events(self, event):
+        """Check for mouse events on the pause menu buttons."""
+        mouse_pos = pygame.mouse.get_pos()
+        if self.resume_button_rect.collidepoint(mouse_pos):
+            self._toggle_pause()
+        elif self.restart_button_rect.collidepoint(mouse_pos):
+            self._restart_game()
+        elif self.exit_button_rect.collidepoint(mouse_pos):
+            sys.exit()
+
+    def _restart_game(self):
+        """Restart the game."""
+        self.stats.reset_stats()
+        self._load_level()
+        self.player.reset_position()
+        self._toggle_pause()
 
 if __name__ == '__main__':
     pp = PythonPlatformer()

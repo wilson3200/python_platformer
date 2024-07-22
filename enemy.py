@@ -96,7 +96,7 @@ class Enemy(Sprite):
     def draw(self, adjusted_rect):
         """Draw the enemy to the screen."""
         # Scale the image to four times its size
-        scaled_image = pygame.transform.scale(self.image, (self.rect.width * 4, self.rect.height * 4))
+        scaled_image = pygame.transform.scale(self.image, (self.rect.width * 6, self.rect.height * 4))
 
         # Adjust the position to keep the center of the sprite at the same location and raise it by 30 pixels
         scaled_rect = scaled_image.get_rect(center=adjusted_rect.center)

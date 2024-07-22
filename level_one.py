@@ -25,7 +25,6 @@ class LevelOne:
 
     def _create_obstacles(self):
         """Create obstacles and ground for level one."""
-        # Example: Add obstacles specific to level one
         self.obstacles.append(Obstacle(self.pp_game, 0, self.pp_game.settings.screen_height - 16, 2000, 16))
         self.obstacles.append(Obstacle(self.pp_game, 3200, self.pp_game.settings.screen_height - 16, 800, 16))
         self.obstacles.append(Obstacle(self.pp_game, 5000, self.pp_game.settings.screen_height - 16, 600, 16))
@@ -35,7 +34,6 @@ class LevelOne:
         self.obstacles.append(Obstacle(self.pp_game, 5800, self.pp_game.settings.screen_height - 240, 300, 16))
         self.obstacles.append(Obstacle(self.pp_game, 6400, self.pp_game.settings.screen_height - 426, 400, 16))
         self.obstacles.append(Obstacle(self.pp_game, 7100, self.pp_game.settings.screen_height - 628, 400, 16))
-        self.obstacles.append(Obstacle(self.pp_game, 0, 0, 16, self.pp_game.settings.screen_height, tile_index=1))
         self.obstacles.append(Obstacle(self.pp_game, 10000, 0, 16, self.pp_game.settings.screen_height, tile_index=1))
 
     def _create_enemies(self):
