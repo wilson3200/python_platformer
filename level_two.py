@@ -8,7 +8,7 @@ class LevelTwo:
         self.pp_game = pp_game
         self.obstacles = []
         self.enemies = []
-        self.level_complete = LevelComplete(self.pp_game, 10_000, self.pp_game.settings.screen_height - 48)
+        self.level_complete = LevelComplete(self.pp_game, 10_550, self.pp_game.settings.screen_height - 48)
         self._create_obstacles()
         self._create_enemies()
 
@@ -19,16 +19,21 @@ class LevelTwo:
 
     def _create_obstacles(self):
         """Create obstacles and ground for level two."""
-        self.obstacles.append(Obstacle(self.pp_game, 0, self.pp_game.settings.screen_height - 16, 2000, 16))
-        self.obstacles.append(Obstacle(self.pp_game, 2200, self.pp_game.settings.screen_height - 16, 1000, 16))
-        self.obstacles.append(Obstacle(self.pp_game, 3500, self.pp_game.settings.screen_height - 200, 500, 16))
-        self.obstacles.append(Obstacle(self.pp_game, 4500, self.pp_game.settings.screen_height - 300, 800, 16))
+        self.obstacles.append(Obstacle(self.pp_game, 0, self.pp_game.settings.screen_height - 16, 1700, 16))
+        self.obstacles.append(Obstacle(self.pp_game, 2200, self.pp_game.settings.screen_height - 16, 800, 16))
+        self.obstacles.append(Obstacle(self.pp_game, 3500, self.pp_game.settings.screen_height - 200, 350, 16))
+        self.obstacles.append(Obstacle(self.pp_game, 4500, self.pp_game.settings.screen_height - 300, 600, 16))
         self.obstacles.append(Obstacle(self.pp_game, 5500, self.pp_game.settings.screen_height - 100, 600, 16))
         self.obstacles.append(Obstacle(self.pp_game, 6500, self.pp_game.settings.screen_height - 400, 700, 16))
-        self.obstacles.append(Obstacle(self.pp_game, 7500, self.pp_game.settings.screen_height - 200, 900, 16))
+        self.obstacles.append(Obstacle(self.pp_game, 7500, self.pp_game.settings.screen_height - 200, 1000, 16))
         self.obstacles.append(Obstacle(self.pp_game, 8500, self.pp_game.settings.screen_height - 500, 1000, 16))
-        self.obstacles.append(Obstacle(self.pp_game, 9500, self.pp_game.settings.screen_height - 200, 250, 16))
-        self.obstacles.append(Obstacle(self.pp_game, 10000, 0, 16, self.pp_game.settings.screen_height, tile_index=1))
+        self.obstacles.append(Obstacle(self.pp_game, 9800, self.pp_game.settings.screen_height - 16, 800, 16))
+
+        # Walls
+        self.obstacles.append(Obstacle(self.pp_game, 10600, 0, 16, self.pp_game.settings.screen_height, tile_index=1))
+
+        # Bonus platforms
+        self.obstacles.append(Obstacle(self.pp_game, 9200, self.pp_game.settings.screen_height - 200, 250, 16))
 
     def _create_enemies(self):
         """Create enemies for level two."""

@@ -7,7 +7,7 @@ class GameStats:
         self.pp_game = pp_game
         self.reset_stats()
         self.game_active = True
-        self.level = 1
+        self.level = 2
         self.level_complete_time = None  # Track when the level was completed
 
     def reset_stats(self):

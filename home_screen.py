@@ -1,10 +1,17 @@
 import tkinter as tk
+import pygame
 from python_platformer import PythonPlatformer
 
 class HomeScreen:
     def __init__(self, master):
         self.master = master
         self.master.title("Game Home Screen")
+
+        # Initialize pygame mixer
+        pygame.mixer.init()
+
+        # Load the button select sound
+        self.select_sound = pygame.mixer.Sound('select.wav')
 
         # Get the screen width and height
         screen_width = self.master.winfo_screenwidth()
@@ -38,11 +45,13 @@ class HomeScreen:
 
     def start_ai(self):
         """Function to handle the "Start AI" button click."""
+        self.select_sound.play()  # Play the select sound
         # This function does nothing for now
         pass
 
     def start_game(self):
         """Function to start the PythonPlatformer game."""
+        self.select_sound.play()  # Play the select sound
         # Close the Tkinter window
         self.master.destroy()
 
@@ -52,6 +61,7 @@ class HomeScreen:
 
     def quit_game(self):
         """Function to quit the application."""
+        self.select_sound.play()  # Play the select sound
         self.master.quit()
 
 def main():

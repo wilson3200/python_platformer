@@ -25,7 +25,23 @@ class PythonPlatformer:
 
         # Pause menu related
         self.pause_menu_active = False
-        # self._play_music()  # Start the music when the game is initialized
+        self.ui_spritesheet = pygame.image.load('UI.png').convert_alpha()
+        self.resume_button_image = self._get_sprite(0, 2)
+        self.resume_button_hover_image = self._get_sprite(0, 3)
+        self.restart_button_image = self._get_sprite(1, 0)
+        self.restart_button_hover_image = self._get_sprite(1, 1)
+        self.exit_button_image = self._get_sprite(1, 2)
+        self.exit_button_hover_image = self._get_sprite(1, 3)
+
+        # Load the button select sound
+        self.select_sound = pygame.mixer.Sound('select.wav')
+
+    def _get_sprite(self, row, col):
+        """Get a sprite from the sprite sheet based on row and column."""
+        sprite_width, sprite_height = 32, 32
+        x = col * sprite_width
+        y = row * sprite_height
+        return self.ui_spritesheet.subsurface(pygame.Rect(x, y, sprite_width, sprite_height))
 
     def _load_level(self):
         """Load the current level based on the stats."""
@@ -192,43 +208,67 @@ class PythonPlatformer:
 
     def _draw_pause_menu(self):
         """Draw the pause menu."""
-        pause_text = self.pause_menu_font.render("Paused", True, (255, 255, 255))
-        resume_button = self._create_button("Resume", (self.settings.screen_width // 2, self.settings.screen_height // 2 - 50))
-        restart_button = self._create_button("Restart", (self.settings.screen_width // 2, self.settings.screen_height // 2))
-        exit_button = self._create_button("Exit", (self.settings.screen_width // 2, self.settings.screen_height // 2 + 50))
+        # Draw the semi-transparent overlay
+        overlay = pygame.Surface((self.settings.screen_width, self.settings.screen_height), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 128))  # Black with 50% opacity
+        self.screen.blit(overlay, (0, 0))
 
-        self.screen.blit(pause_text, (self.settings.screen_width // 2 - pause_text.get_width() // 2, self.settings.screen_height // 2 - 100))
-        self.screen.blit(resume_button[0], resume_button[1])
-        self.screen.blit(restart_button[0], restart_button[1])
-        self.screen.blit(exit_button[0], exit_button[1])
+        # Calculate button positions
+        button_width, button_height = 32, 32  # Assuming buttons are 32x32
+        button_spacing = 20
+        total_height = 3 * button_height + 2 * button_spacing
+        start_y = (self.settings.screen_height - total_height) // 2
 
-        self.resume_button_rect = resume_button[1]
-        self.restart_button_rect = restart_button[1]
-        self.exit_button_rect = exit_button[1]
+        resume_button_rect = pygame.Rect(
+            (self.settings.screen_width - button_width) // 2, start_y, button_width, button_height)
+        restart_button_rect = pygame.Rect(
+            (self.settings.screen_width - button_width) // 2, start_y + button_height + button_spacing, button_width, button_height)
+        exit_button_rect = pygame.Rect(
+            (self.settings.screen_width - button_width) // 2, start_y + 2 * (button_height + button_spacing), button_width, button_height)
 
-    def _create_button(self, text, position):
-        """Create a button with text and return the text surface and its rect."""
-        button_text = self.pause_menu_font.render(text, True, (0, 0, 0))  # Changed color to black
-        button_rect = button_text.get_rect(center=position)
-        return button_text, button_rect
+        # Draw buttons with hover effect
+        mouse_pos = pygame.mouse.get_pos()
+        self._draw_button(resume_button_rect, self.resume_button_image, self.resume_button_hover_image, mouse_pos)
+        self._draw_button(restart_button_rect, self.restart_button_image, self.restart_button_hover_image, mouse_pos)
+        self._draw_button(exit_button_rect, self.exit_button_image, self.exit_button_hover_image, mouse_pos)
+
+        pygame.display.flip()
+
+    def _draw_button(self, rect, default_image, hover_image, mouse_pos):
+        """Draw a button with hover effect."""
+        if rect.collidepoint(mouse_pos):
+            self.screen.blit(hover_image, rect)
+        else:
+            self.screen.blit(default_image, rect)
 
     def _check_pause_menu_events(self, event):
-        """Check for mouse events on the pause menu buttons."""
+        """Handle mouse click events on the pause menu."""
         mouse_pos = pygame.mouse.get_pos()
-        if self.resume_button_rect.collidepoint(mouse_pos):
-            self._toggle_pause()
-        elif self.restart_button_rect.collidepoint(mouse_pos):
-            self._restart_game()
-        elif self.exit_button_rect.collidepoint(mouse_pos):
-            sys.exit()
+        button_width, button_height = 32, 32
+        button_spacing = 20
+        total_height = 3 * button_height + 2 * button_spacing
+        start_y = (self.settings.screen_height - total_height) // 2
 
-    def _restart_game(self):
-        """Restart the game."""
-        self.stats.reset_stats()
-        self._load_level()
-        self.player.reset_position()
-        self._toggle_pause()
+        resume_button_rect = pygame.Rect(
+            (self.settings.screen_width - button_width) // 2, start_y, button_width, button_height)
+        restart_button_rect = pygame.Rect(
+            (self.settings.screen_width - button_width) // 2, start_y + button_height + button_spacing, button_width, button_height)
+        exit_button_rect = pygame.Rect(
+            (self.settings.screen_width - button_width) // 2, start_y + 2 * (button_height + button_spacing), button_width, button_height)
+
+        if event.button == 1:  # Left mouse button click
+            if resume_button_rect.collidepoint(mouse_pos):
+                self.select_sound.play()
+                self._toggle_pause()
+            elif restart_button_rect.collidepoint(mouse_pos):
+                self.select_sound.play()
+                self.stats.reset_stats()
+                self._load_level()
+                self._toggle_pause()
+            elif exit_button_rect.collidepoint(mouse_pos):
+                self.select_sound.play()
+                sys.exit()
 
 if __name__ == '__main__':
-    pp = PythonPlatformer()
-    pp.run_game()
+    pp_game = PythonPlatformer()
+    pp_game.run_game()
