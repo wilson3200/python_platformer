@@ -6,6 +6,7 @@ from game_stats import GameStats
 from player import Player
 from level_one import LevelOne
 from level_two import LevelTwo
+from level_three import LevelThree
 
 class PythonPlatformer:
     """Class to manage game, the assets, and behaviors."""
@@ -37,6 +38,12 @@ class PythonPlatformer:
         # Load the button select sound
         self.select_sound = pygame.mixer.Sound('select.wav')
 
+        # Load the player death sound
+        self.die_sound = pygame.mixer.Sound('die.wav')
+
+        # Initialize Level complete collision boolean
+        self.level_complete_collided = False
+
     def _get_sprite(self, row, col):
         """Get a sprite from the sprite sheet based on row and column."""
         sprite_width, sprite_height = 32, 32
@@ -50,14 +57,16 @@ class PythonPlatformer:
             self.level = LevelOne(self)
         elif self.stats.level == 2:
             self.level = LevelTwo(self)
+        elif self.stats.level == 3:
+            self.level = LevelThree(self)
         self.level.set_player_position()  # Set the player's initial position for the loaded level
+        self.level_complete_collided = False
 
         # Update the enemies attribute with the level's enemies
         self.enemies = self.level.enemies
 
     def run_game(self):
         """Start the main loop for the game."""
-        level_complete_collided = False  # Track if collision with level complete object has occurred
         start_time = pygame.time.get_ticks()  # Add this line to get the start time
 
         while True:
@@ -72,9 +81,9 @@ class PythonPlatformer:
 
                 # Check if player reached level complete object
                 if pygame.sprite.collide_rect(self.player, self.level.level_complete):
-                    if not level_complete_collided:  # Only open the chest if not already opened
+                    if not self.level_complete_collided:  # Only open the chest if not already opened
                         self.level.level_complete.open()
-                        level_complete_collided = True  # Mark as collided to avoid reopening
+                        self.level_complete_collided = True  # Mark as collided to avoid reopening
                         self.stats.level_complete_time = pygame.time.get_ticks()  # Record the time of collision
 
             self._update_screen()
@@ -87,7 +96,7 @@ class PythonPlatformer:
         """Start the next level."""
         self.stats.level += 1
         self.stats.level_complete_time = None  # Reset the level complete time
-        self.level = LevelTwo(self)
+        self._load_level()
         self.level.set_player_position()  # Set the player's position for the new level
 
     def _check_collisions(self):
@@ -120,7 +129,10 @@ class PythonPlatformer:
         for enemy in self.level.enemies:
             if self.player.rect.colliderect(enemy.rect):
                 # If player collides with any enemy, end the game
+                self.die_sound.play()
+                pygame.mixer.music.pause()
                 self.stats.game_active = False
+                self.pause_menu_active = True
                 break
 
         # Check collisions between enemies and obstacles
@@ -134,7 +146,10 @@ class PythonPlatformer:
 
         # Check to see if player fell off the map
         if self.player.rect.y >= self.settings.screen_height + 200:
+            self.die_sound.play()
+            pygame.mixer.music.pause()
             self.stats.game_active = False
+            self.pause_menu_active = True
 
     def _check_events(self):
         """Watch for keyboard and mouse events."""

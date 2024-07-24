@@ -75,8 +75,10 @@ class Player(Sprite):
         # Track last movement direction for idle animation
         self.last_direction = "right"  # Initial direction
 
-        # Load the jump sound effect
+        # Load player sound effects
         self.jump_sound = pygame.mixer.Sound('jump1.wav')
+        self.attack_sound = pygame.mixer.Sound('attack.wav')
+        self.hit_enemy_sound = pygame.mixer.Sound('hit_enemy.wav')
 
     def _extract_frames(self):
         """Extract frames from the spritesheets."""
@@ -211,12 +213,14 @@ class Player(Sprite):
     def attack(self, enemies):
         """Attack enemies if within range and facing them."""
         self.attacking = True
+        self.attack_sound.play() # Play the attack sound
         for enemy in enemies:
             if self.attacking:
                 distance = math.hypot(enemy.rect.centerx - self.rect.centerx, enemy.rect.centery - self.rect.centery)
                 if distance < self.attack_range:
                     if (self.last_direction == "right" and enemy.rect.centerx > self.rect.centerx) or \
                             (self.last_direction == "left" and enemy.rect.centerx < self.rect.centerx):
+                        self.hit_enemy_sound.play()
                         enemies.remove(enemy)
                         break
 
