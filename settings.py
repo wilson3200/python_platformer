@@ -14,6 +14,8 @@ class Settings:
         self.idle_animation_time = 50
         self.running_animation_time = 20
         self.jumping_animation_time = 50
+        self.attack_animation_time = 10
+        self.attack_range = 100
 
         # Gravity settings
         self.gravity = .05  # Increased gravity for better vertical movement

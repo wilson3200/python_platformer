@@ -1,5 +1,6 @@
 import pygame
 from pygame.sprite import Sprite
+import math
 
 class Player(Sprite):
     """A class to manage the player."""
@@ -15,6 +16,7 @@ class Player(Sprite):
         self.walk_spritesheet = pygame.image.load('player_walk.png').convert_alpha()
         self.idle_spritesheet = pygame.image.load('player_idle.png').convert_alpha()
         self.jump_spritesheet = pygame.image.load('player_jump.png').convert_alpha()
+        self.attack_spritesheet = pygame.image.load('attack.png').convert_alpha()  # Load attack spritesheet
 
         # Define dimensions of frames in the spritesheets
         self.frame_width = 100  # Adjust according to your spritesheets
@@ -37,6 +39,14 @@ class Player(Sprite):
         self.jump_frames = []  # List to store jump frames
         self.jump_frame_delay = self.settings.jumping_animation_time  # Number of game loops before updating jump frame
         self.jump_loop_count = 0  # Counter for jump animation loops
+
+        # Initialize animation variables for attacking
+        self.current_attack_frame = 0
+        self.attack_frames = []  # List to store attack frames
+        self.attack_frame_delay = self.settings.attack_animation_time  # Number of game loops before updating attack frame
+        self.attack_loop_count = 0  # Counter for attack animation loops
+        self.attacking = False  # Flag to indicate if the player is attacking
+        self.attack_range = self.settings.attack_range # Define the attack range
 
         self._extract_frames()
 
@@ -73,6 +83,7 @@ class Player(Sprite):
         self._extract_walk_frames()
         self._extract_idle_frames()
         self._extract_jump_frames()
+        self._extract_attack_frames()
 
     def _extract_walk_frames(self):
         """Extract walking frames from the walk spritesheet."""
@@ -98,43 +109,24 @@ class Player(Sprite):
             frame_image = self.jump_spritesheet.subsurface(frame_rect)
             self.jump_frames.append(frame_image)
 
-    def update(self):
+    def _extract_attack_frames(self):
+        """Extract attack frames from the attack spritesheet."""
+        num_frames = self.attack_spritesheet.get_width() // self.frame_width
+        for i in range(num_frames):
+            frame_rect = pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height)
+            frame_image = self.attack_spritesheet.subsurface(frame_rect)
+            self.attack_frames.append(frame_image)
+
+    def update(self, enemies):
         """Update the player's position and animation."""
-        if self.moving_right or self.moving_left:
-            # Update walking animation
-            self.walk_loop_count += 1
-            if self.walk_loop_count >= self.walk_frame_delay:
-                self.current_walk_frame = (self.current_walk_frame + 1) % len(self.walk_frames)
-                self.image = self.walk_frames[self.current_walk_frame]
-                self.walk_loop_count = 0
-
-                # Flip sprite if moving left
-                if self.moving_left:
-                    self.image = pygame.transform.flip(self.image, True, False)
-
+        if self.attacking:
+            self._update_attack_animation()
+        elif self.moving_right or self.moving_left:
+            self._update_walk_animation()
         elif self.jumping:
-            # Update jump animation
-            self.jump_loop_count += 1
-            if self.jump_loop_count >= self.jump_frame_delay:
-                self.current_jump_frame = (self.current_jump_frame + 1) % len(self.jump_frames)
-                self.image = self.jump_frames[self.current_jump_frame]
-                self.jump_loop_count = 0
-
-                # Flip sprite if moving left
-                if self.moving_left:
-                    self.image = pygame.transform.flip(self.image, True, False)
-
+            self._update_jump_animation()
         else:
-            # Update idle animation
-            self.idle_loop_count += 1
-            if self.idle_loop_count >= self.idle_frame_delay:
-                self.current_idle_frame = (self.current_idle_frame + 1) % len(self.idle_frames)
-                self.image = self.idle_frames[self.current_idle_frame]
-                self.idle_loop_count = 0
-
-                # Flip sprite based on last movement direction
-                if self.last_direction == "left":
-                    self.image = pygame.transform.flip(self.image, True, False)
+            self._update_idle_animation()
 
         # Update player's position based on movement flags
         if self.moving_right:
@@ -159,6 +151,74 @@ class Player(Sprite):
         # Update the rect object from self.x and self.y
         self.rect.x = self.x
         self.rect.y = self.y
+
+        # Check for attack collisions with enemies
+        if self.attacking:
+            self.attack(enemies)
+
+    def _update_walk_animation(self):
+        """Update the walking animation."""
+        self.walk_loop_count += 1
+        if self.walk_loop_count >= self.walk_frame_delay:
+            self.current_walk_frame = (self.current_walk_frame + 1) % len(self.walk_frames)
+            self.image = self.walk_frames[self.current_walk_frame]
+            self.walk_loop_count = 0
+
+            # Flip sprite if moving left
+            if self.moving_left:
+                self.image = pygame.transform.flip(self.image, True, False)
+
+    def _update_idle_animation(self):
+        """Update the idle animation."""
+        self.idle_loop_count += 1
+        if self.idle_loop_count >= self.idle_frame_delay:
+            self.current_idle_frame = (self.current_idle_frame + 1) % len(self.idle_frames)
+            self.image = self.idle_frames[self.current_idle_frame]
+            self.idle_loop_count = 0
+
+            # Flip sprite based on last movement direction
+            if self.last_direction == "left":
+                self.image = pygame.transform.flip(self.image, True, False)
+
+    def _update_jump_animation(self):
+        """Update the jump animation."""
+        self.jump_loop_count += 1
+        if self.jump_loop_count >= self.jump_frame_delay:
+            self.current_jump_frame = (self.current_jump_frame + 1) % len(self.jump_frames)
+            self.image = self.jump_frames[self.current_jump_frame]
+            self.jump_loop_count = 0
+
+            # Flip sprite if moving left
+            if self.moving_left:
+                self.image = pygame.transform.flip(self.image, True, False)
+
+    def _update_attack_animation(self):
+        """Update the attack animation."""
+        self.attack_loop_count += 1
+        if self.attack_loop_count >= self.attack_frame_delay:
+            self.current_attack_frame = (self.current_attack_frame + 1) % len(self.attack_frames)
+            self.image = self.attack_frames[self.current_attack_frame]
+            self.attack_loop_count = 0
+
+            # Flip sprite based on last movement direction
+            if self.last_direction == "left":
+                self.image = pygame.transform.flip(self.image, True, False)
+
+            # If the animation is over, stop attacking
+            if self.current_attack_frame == 0:
+                self.attacking = False
+
+    def attack(self, enemies):
+        """Attack enemies if within range and facing them."""
+        self.attacking = True
+        for enemy in enemies:
+            if self.attacking:
+                distance = math.hypot(enemy.rect.centerx - self.rect.centerx, enemy.rect.centery - self.rect.centery)
+                if distance < self.attack_range:
+                    if (self.last_direction == "right" and enemy.rect.centerx > self.rect.centerx) or \
+                            (self.last_direction == "left" and enemy.rect.centerx < self.rect.centerx):
+                        enemies.remove(enemy)
+                        break
 
     def draw(self):
         """Draw the player's sprite and the collision rect."""

@@ -1,5 +1,6 @@
 import sys
 import pygame
+import math
 from settings import Settings
 from game_stats import GameStats
 from player import Player
@@ -51,19 +52,23 @@ class PythonPlatformer:
             self.level = LevelTwo(self)
         self.level.set_player_position()  # Set the player's initial position for the loaded level
 
+        # Update the enemies attribute with the level's enemies
+        self.enemies = self.level.enemies
+
     def run_game(self):
         """Start the main loop for the game."""
         level_complete_collided = False  # Track if collision with level complete object has occurred
+        start_time = pygame.time.get_ticks()  # Add this line to get the start time
 
         while True:
             self._check_events()
             if self.stats.game_active and not self.pause_menu_active:
-                self.player.update()
-                self.player.draw()
+                self.player.update(enemies=self.enemies)
+                self.level.update()
                 self._update_camera()
                 self._check_collisions()
-                self.level.update()
-                self.stats.update_time()
+                # Update the elapsed time
+                self.stats.elapsed_time = (pygame.time.get_ticks() - start_time) / 1000  # Calculate elapsed time in seconds
 
                 # Check if player reached level complete object
                 if pygame.sprite.collide_rect(self.player, self.level.level_complete):
@@ -152,6 +157,8 @@ class PythonPlatformer:
         elif event.key == pygame.K_w:
             if not self.player.is_jumping:
                 self.player.jumping = True
+        elif event.key == pygame.K_SPACE:
+            self.player.attack(self.level.enemies)  # Call the attack method and pass the enemies group
         elif event.key == pygame.K_ESCAPE:
             self._toggle_pause()
 
