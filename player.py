@@ -12,6 +12,9 @@ class Player(Sprite):
         self.settings = pp_game.settings
         self.screen_rect = pp_game.screen.get_rect()
 
+        # Power-up variable
+        self.can_attack = False
+
         # Load spritesheets for different animations
         self.walk_spritesheet = pygame.image.load('player_walk.png').convert_alpha()
         self.idle_spritesheet = pygame.image.load('player_idle.png').convert_alpha()

@@ -2,15 +2,18 @@ import pygame
 from obstacle import Obstacle
 from enemy import Enemy
 from level_complete import LevelComplete
+from power_up import PowerUp
 
 class LevelTwo:
     def __init__(self, pp_game):
         self.pp_game = pp_game
         self.obstacles = []
         self.enemies = []
+        self.power_ups = pygame.sprite.Group()
         self.level_complete = LevelComplete(self.pp_game, 10_550, self.pp_game.settings.screen_height - 48)
         self._create_obstacles()
         self._create_enemies()
+        self._create_power_ups()
 
         # Load background music
         pygame.mixer.music.load('connected.ogg')
@@ -47,6 +50,10 @@ class LevelTwo:
         self.enemies.append(Enemy(self.pp_game, 8600, self.pp_game.settings.screen_height - 500 - 25))
         self.enemies.append(Enemy(self.pp_game, 9700, self.pp_game.settings.screen_height - 16))
 
+    def _create_power_ups(self):
+        """Create power ups for level two."""
+        self.power_ups.add(PowerUp(self.pp_game,9_300, self.pp_game.settings.screen_height-250))
+
     def set_player_position(self):
         """Set the player's initial position for level two."""
         self.pp_game.player.rect.topleft = (100, self.pp_game.settings.screen_height - 100)  # Start near the left edge
@@ -58,6 +65,8 @@ class LevelTwo:
         for enemy in self.enemies:
             enemy.check_edges(self.obstacles)
             enemy.update()
+        for power_up in self.power_ups:
+            power_up.update()
 
     def draw(self):
         """Draw level two elements."""
@@ -69,6 +78,8 @@ class LevelTwo:
             adjusted_enemy_rect = enemy.rect.copy()
             adjusted_enemy_rect.x -= self.pp_game.camera_x
             enemy.draw(adjusted_enemy_rect)
+        for power_up in self.power_ups:
+            power_up.draw(self.pp_game.camera_x)
         adjusted_level_complete_rect = self.level_complete.rect.copy()
         adjusted_level_complete_rect.x -= self.pp_game.camera_x
         self.level_complete.draw(self.pp_game.screen, adjusted_level_complete_rect)

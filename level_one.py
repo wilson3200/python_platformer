@@ -15,6 +15,7 @@ class LevelOne:
         # Load background music
         pygame.mixer.music.load('box_jump.ogg')
         pygame.mixer.music.set_volume(0.5)  # Set volume to 50%
+        pygame.mixer.music.set_volume(0.5)  # Set volume to 50%
         pygame.mixer.music.play(-1)  # loops indefinitely
 
     def set_player_position(self):

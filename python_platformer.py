@@ -7,6 +7,7 @@ from player import Player
 from level_one import LevelOne
 from level_two import LevelTwo
 from level_three import LevelThree
+from power_up import PowerUp
 
 class PythonPlatformer:
     """Class to manage game, the assets, and behaviors."""
@@ -41,6 +42,9 @@ class PythonPlatformer:
         # Load the player death sound
         self.die_sound = pygame.mixer.Sound('die.wav')
 
+        # Load the power-up sound
+        self.power_up_sound = pygame.mixer.Sound('power_up.wav')
+
         # Initialize Level complete collision boolean
         self.level_complete_collided = False
 
@@ -53,6 +57,7 @@ class PythonPlatformer:
 
     def _load_level(self):
         """Load the current level based on the stats."""
+
         if self.stats.level == 1:
             self.level = LevelOne(self)
         elif self.stats.level == 2:
@@ -144,6 +149,17 @@ class PythonPlatformer:
                         enemy.y = enemy.rect.bottom
                         enemy.vertical_speed = 0
 
+        # Check for collisions between power up and player
+        if self.stats.level == 2:
+            for power_up in self.level.power_ups:
+                if pygame.sprite.collide_rect(self.player, power_up):
+                    self.player.can_attack = True
+                    power_up.kill()
+                    self.power_up_sound.play()
+                    print("detected collision.")
+        else:
+            pass
+
         # Check to see if player fell off the map
         if self.player.rect.y >= self.settings.screen_height + 200:
             self.die_sound.play()
@@ -173,7 +189,8 @@ class PythonPlatformer:
             if not self.player.is_jumping:
                 self.player.jumping = True
         elif event.key == pygame.K_SPACE:
-            self.player.attack(self.level.enemies)  # Call the attack method and pass the enemies group
+            if self.player.can_attack and not self.pause_menu_active:
+                self.player.attack(self.level.enemies)
         elif event.key == pygame.K_ESCAPE:
             self._toggle_pause()
 
@@ -278,12 +295,14 @@ class PythonPlatformer:
         exit_button_rect = pygame.Rect(
             (self.settings.screen_width - button_width) // 2, start_y + 2 * (button_height + button_spacing), button_width, button_height)
 
+        # Pause menu functions
         if event.button == 1:  # Left mouse button click
             if resume_button_rect.collidepoint(mouse_pos):
                 self.select_sound.play()
                 self._toggle_pause()
             elif restart_button_rect.collidepoint(mouse_pos):
                 self.select_sound.play()
+                self.player.can_attack = False
                 self.stats.reset_stats()
                 self._load_level()
                 self._toggle_pause()

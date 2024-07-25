@@ -29,3 +29,6 @@ class Settings:
 
         # Enemy settings
         self.enemy_speed = 0.35  # Speed of enemy NPCs
+
+        # Power-up settings
+        self.power_up_animation_time = 50
