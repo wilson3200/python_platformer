@@ -126,7 +126,7 @@ class Player(Sprite):
         """Update the player's position and animation."""
         if self.attacking:
             self._update_attack_animation()
-        elif self.moving_right or self.moving_left:
+        elif (self.moving_right or self.moving_left) and not self.jumping:
             self._update_walk_animation()
         elif self.jumping:
             self._update_jump_animation()
@@ -194,7 +194,7 @@ class Player(Sprite):
             self.jump_loop_count = 0
 
             # Flip sprite if moving left
-            if self.moving_left:
+            if self.last_direction == 'left':
                 self.image = pygame.transform.flip(self.image, True, False)
 
     def _update_attack_animation(self):

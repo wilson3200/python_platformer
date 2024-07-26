@@ -20,7 +20,7 @@ class Enemy(Sprite):
         # Initialize animation variables
         self.current_frame = 0
         self.frames = []  # List to store frames
-        self.frame_delay = 125  # Number of game loops before updating frame
+        self.frame_delay = self.settings.enemy_animation_speed  # Number of game loops before updating frame
         self.loop_count = 0  # Counter for animation loops
 
         self._extract_frames(row)

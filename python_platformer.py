@@ -25,6 +25,7 @@ class PythonPlatformer:
         self._load_level()  # Load the initial level
         self.font = pygame.font.SysFont(None, 48)
         self.pause_menu_font = pygame.font.SysFont(None, 72)
+        self.round_ended = False
 
         # Pause menu related
         self.pause_menu_active = False
@@ -37,8 +38,8 @@ class PythonPlatformer:
         self.exit_button_hover_image = self._get_sprite(1, 3)
 
         # FPS
-        # self.clock = pygame.time.Clock()
-        # self.fps = 1000
+        self.clock = pygame.time.Clock()
+        self.fps = self.settings.fps
 
         # Load the button select sound
         self.select_sound = pygame.mixer.Sound('select.wav')
@@ -79,7 +80,7 @@ class PythonPlatformer:
         start_time = pygame.time.get_ticks()  # Add this line to get the start time
 
         while True:
-            # self.clock.tick(self.fps)
+            self.clock.tick(self.fps)
             self._check_events()
             if self.stats.game_active and not self.pause_menu_active:
                 self.player.update(enemies=self.enemies)
@@ -95,12 +96,14 @@ class PythonPlatformer:
                         self.level.level_complete.open()
                         self.level_complete_collided = True  # Mark as collided to avoid reopening
                         self.stats.level_complete_time = pygame.time.get_ticks()  # Record the time of collision
+                        self.round_ended = True
 
             self._update_screen()
 
             # Check if level completion delay has passed
             if self.stats.level_complete_time and (pygame.time.get_ticks() - self.stats.level_complete_time >= 2000):
                 self._start_next_level()
+                self.round_ended = False
 
     def _start_next_level(self):
         """Start the next level."""
@@ -132,18 +135,26 @@ class PythonPlatformer:
                     self.player.x = self.player.rect.left
 
         if not player_colliding and not self.player.is_jumping:
-            self.player.is_jumping = False
-            self.player.vertical_speed = 1.0
+            # self.player.is_jumping = False (Removed to help with animation bugs)
+            self.player.vertical_speed = self.settings.gravity_fall
 
-        # Check collisions between player and enemies using rect
-        for enemy in self.level.enemies:
-            if self.player.rect.colliderect(enemy.rect):
-                # If player collides with any enemy, end the game
-                self.die_sound.play()
-                pygame.mixer.music.pause()
-                self.stats.game_active = False
-                self.pause_menu_active = True
-                break
+        if not self.round_ended:
+            # Check collisions between player and enemies using rect
+            for enemy in self.level.enemies:
+                if self.player.rect.colliderect(enemy.rect):
+                    # If player collides with any enemy, end the game
+                    self.die_sound.play()
+                    pygame.mixer.music.pause()
+                    self.stats.game_active = False
+                    self.pause_menu_active = True
+                    break
+
+                # Check to see if player fell off the map
+                if self.player.rect.y >= self.settings.screen_height + 200:
+                    self.die_sound.play()
+                    pygame.mixer.music.pause()
+                    self.stats.game_active = False
+                    self.pause_menu_active = True
 
         # Check collisions between enemies and obstacles
         for enemy in self.level.enemies:
@@ -164,13 +175,6 @@ class PythonPlatformer:
                     print("detected collision.")
         else:
             pass
-
-        # Check to see if player fell off the map
-        if self.player.rect.y >= self.settings.screen_height + 200:
-            self.die_sound.play()
-            pygame.mixer.music.pause()
-            self.stats.game_active = False
-            self.pause_menu_active = True
 
     def _check_events(self):
         """Watch for keyboard and mouse events."""

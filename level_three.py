@@ -32,9 +32,6 @@ class LevelThree:
         self.obstacles.append(Obstacle(self.pp_game, 7100, self.pp_game.settings.screen_height - 220, 670, 16))
         self.obstacles.append(Obstacle(self.pp_game, 8200, self.pp_game.settings.screen_height - 500, 500, 16))
         self.obstacles.append(Obstacle(self.pp_game, 9_200, self.pp_game.settings.screen_height - 200, 600, 16))
-
-
-
         self.obstacles.append(Obstacle(self.pp_game, 10_500, self.pp_game.settings.screen_height - 16, 125, 16))
 
         # Walls
@@ -49,8 +46,8 @@ class LevelThree:
         self.enemies.append(Enemy(self.pp_game, 5600, self.pp_game.settings.screen_height - 100 - 25))
         self.enemies.append(Enemy2(self.pp_game, 6000, self.pp_game.settings.screen_height - 700 - 25))
         self.enemies.append(Enemy(self.pp_game, 6600, self.pp_game.settings.screen_height - 400 - 25))
-        self.enemies.append(Enemy(self.pp_game, 7200, self.pp_game.settings.screen_height - 400 - 25))
-        self.enemies.append(Enemy2(self.pp_game, 8300, self.pp_game.settings.screen_height - 550 - 25))
+        self.enemies.append(Enemy(self.pp_game, 7200, self.pp_game.settings.screen_height - 200 - 25))
+        self.enemies.append(Enemy2(self.pp_game, 8300, self.pp_game.settings.screen_height - 200 - 25))
         self.enemies.append(Enemy2(self.pp_game, 9500, self.pp_game.settings.screen_height - 550 - 25))
 
     def set_player_position(self):

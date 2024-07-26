@@ -15,10 +15,11 @@ class Settings:
         self.running_animation_time = 20
         self.jumping_animation_time = 50
         self.attack_animation_time = 10
-        self.attack_range = 100
+        self.attack_range = 100.0
 
         # Gravity settings
-        self.gravity = .05
+        self.gravity = 0.05
+        self.gravity_fall = 1.5
 
         # Camera settings
         self.camera_speed = 1.5
@@ -30,6 +31,10 @@ class Settings:
         # Enemy settings
         self.enemy_speed = 0.35
         self.enemy2_speed = 0.7
+        self.enemy_animation_speed = 100
 
         # Power-up settings
         self.power_up_animation_time = 50
+
+        # FPS Settings
+        self.fps = 400
