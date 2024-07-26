@@ -1,6 +1,7 @@
 import pygame
 from obstacle import Obstacle
 from enemy import Enemy
+from enemy import Enemy2
 from level_complete import LevelComplete
 from power_up import PowerUp
 

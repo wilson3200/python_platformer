@@ -4,7 +4,7 @@ from pygame.sprite import Sprite
 class Enemy(Sprite):
     """A class to represent an enemy in the game."""
 
-    def __init__(self, pp_game, x, y):
+    def __init__(self, pp_game, x, y, row=8, speed=None):
         """Initialize the enemy and its starting position."""
         super().__init__()
         self.screen = pp_game.screen
@@ -23,7 +23,7 @@ class Enemy(Sprite):
         self.frame_delay = 125  # Number of game loops before updating frame
         self.loop_count = 0  # Counter for animation loops
 
-        self._extract_frames()
+        self._extract_frames(row)
 
         # Set initial enemy image and rect
         self.image = self.frames[self.current_frame]
@@ -39,7 +39,7 @@ class Enemy(Sprite):
 
         # Movement flags
         self.moving_right = True
-        self.speed = self.settings.enemy_speed
+        self.speed = speed if speed is not None else self.settings.enemy_speed
 
         # Gravity settings
         self.vertical_speed = 0
@@ -48,13 +48,9 @@ class Enemy(Sprite):
         # Track last movement direction for sprite flipping
         self.last_direction = "right"
 
-    def _extract_frames(self):
+    def _extract_frames(self, row):
         """Extract frames from the spritesheet."""
-        num_rows = 12  # Total number of rows in the spritesheet
         num_cols = 4  # Total number of columns in the spritesheet
-
-        # Select the 9th row for this enemy's animation
-        row = 8  # Zero-based index (9th row)
 
         for col in range(num_cols):
             frame_rect = pygame.Rect(col * self.frame_width, row * self.frame_height, self.frame_width, self.frame_height)
@@ -123,3 +119,9 @@ class Enemy(Sprite):
                     self.switch_direction()
         if not on_obstacle:
             self.vertical_speed += self.gravity
+
+class Enemy2(Enemy):
+    """A class to represent a fast enemy in the game."""
+    def __init__(self, pp_game, x, y):
+        """Initialize the fast enemy with a different sprite and speed."""
+        super().__init__(pp_game, x, y, row=4, speed=pp_game.settings.enemy2_speed)

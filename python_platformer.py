@@ -36,6 +36,10 @@ class PythonPlatformer:
         self.exit_button_image = self._get_sprite(1, 2)
         self.exit_button_hover_image = self._get_sprite(1, 3)
 
+        # FPS
+        # self.clock = pygame.time.Clock()
+        # self.fps = 1000
+
         # Load the button select sound
         self.select_sound = pygame.mixer.Sound('select.wav')
 
@@ -75,6 +79,7 @@ class PythonPlatformer:
         start_time = pygame.time.get_ticks()  # Add this line to get the start time
 
         while True:
+            # self.clock.tick(self.fps)
             self._check_events()
             if self.stats.game_active and not self.pause_menu_active:
                 self.player.update(enemies=self.enemies)
@@ -241,9 +246,9 @@ class PythonPlatformer:
         self.pause_menu_active = not self.pause_menu_active
         self.stats.game_active = not self.pause_menu_active
         if not self.pause_menu_active:
-            pygame.mixer.music.unpause()  # Resume music when game is unpaused
+            pygame.mixer.music.unpause()
         else:
-            pygame.mixer.music.pause()  # Pause music when game is paused
+            pygame.mixer.music.pause()
 
     def _draw_pause_menu(self):
         """Draw the pause menu."""

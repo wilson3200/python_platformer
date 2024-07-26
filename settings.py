@@ -10,7 +10,7 @@ class Settings:
 
         # Player settings
         self.player_speed = 1.5
-        self.jump_strength = 7.0  # Increased jump strength for better vertical movement
+        self.jump_strength = 7.0
         self.idle_animation_time = 50
         self.running_animation_time = 20
         self.jumping_animation_time = 50
@@ -18,7 +18,7 @@ class Settings:
         self.attack_range = 100
 
         # Gravity settings
-        self.gravity = .05  # Increased gravity for better vertical movement
+        self.gravity = .05
 
         # Camera settings
         self.camera_speed = 1.5
@@ -28,7 +28,8 @@ class Settings:
         self.bg_color = (255, 255, 255)  # White background
 
         # Enemy settings
-        self.enemy_speed = 0.35  # Speed of enemy NPCs
+        self.enemy_speed = 0.35
+        self.enemy2_speed = 0.7
 
         # Power-up settings
         self.power_up_animation_time = 50
