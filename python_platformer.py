@@ -7,7 +7,6 @@ from player import Player
 from level_one import LevelOne
 from level_two import LevelTwo
 from level_three import LevelThree
-from power_up import PowerUp
 
 class PythonPlatformer:
     """Class to manage game, the assets, and behaviors."""
@@ -225,7 +224,7 @@ class PythonPlatformer:
         adjusted_player_rect = self.player.rect.copy()
         adjusted_player_rect.x -= self.camera_x
         self.screen.blit(self.player.image, adjusted_player_rect)
-        self.level.draw()  # Draw level elements
+        self.level.draw()
 
         # Draw the level complete object
         adjusted_level_complete_rect = self.level.level_complete.rect.copy()

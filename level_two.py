@@ -25,7 +25,7 @@ class LevelTwo:
         """Create obstacles and ground for level two."""
         self.obstacles.append(Obstacle(self.pp_game, 0, self.pp_game.settings.screen_height - 16, 1700, 16))
         self.obstacles.append(Obstacle(self.pp_game, 2200, self.pp_game.settings.screen_height - 16, 800, 16))
-        self.obstacles.append(Obstacle(self.pp_game, 3500, self.pp_game.settings.screen_height - 200, 350, 16))
+        self.obstacles.append(Obstacle(self.pp_game, 3400, self.pp_game.settings.screen_height - 200, 450, 16))
         self.obstacles.append(Obstacle(self.pp_game, 4500, self.pp_game.settings.screen_height - 300, 600, 16))
         self.obstacles.append(Obstacle(self.pp_game, 5500, self.pp_game.settings.screen_height - 100, 600, 16))
         self.obstacles.append(Obstacle(self.pp_game, 6500, self.pp_game.settings.screen_height - 400, 700, 16))
